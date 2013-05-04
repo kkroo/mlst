@@ -21,6 +21,9 @@ def load_graphs():
 
     return graphs
 
+def tree(G):
+    return None
+
 # To run this program run: python mlst.py file.in
 if __name__ == '__main__':
     graphs = load_graphs();
