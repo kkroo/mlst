@@ -95,7 +95,7 @@ class GraphToolInFileReader(Reader):
         if num_edges > config.MAX_NUM_EDGES:
             raise self.exception('Number of edges cannot '+
                     'exceed {0}.'.format(config.MAX_NUM_EDGES))
-        g = Graph()
+        g = Graph(directed=False)
         v_added = {}
         for i in range(num_edges):
             nums = self.read_numbers('Cannot parse the next edge.', 2)

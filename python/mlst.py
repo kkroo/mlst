@@ -20,7 +20,9 @@ def load_graphs():
         print_error("({0}) {1}\n".format(infile, e))
 
     return graphs
-
+def vertices_deg_k(k,G):
+    # return all vertices of deg > k
+    return None
 def tree(G):
     return None
 
