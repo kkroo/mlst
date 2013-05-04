@@ -1,6 +1,6 @@
 import config
 import graph
-
+from graph_tool.all import *
 import re
 
 NUMBER_FORMAT_REGEXP = [None
@@ -69,6 +69,53 @@ class Reader:
                 raise self.exception_with_expected('{0} ({1})'.format(message,
                     e), NUMBER_EXPECTED_MESSAGE[n])
         return nums
+class GraphToolInFileReader(Reader):
+    def read_input_file(self):
+        nums = self.read_numbers('Cannot parse the number of input graphs.', 1)
+
+        num_cases = nums[0]
+        graphs = []
+        for i in range(num_cases):
+            self.case_num = i+1
+            g = self.read_input_graph()
+            graphs.append(g)
+
+        self.case_num += 1
+        self.readline()
+        if len(self.line) > 0:
+            raise self.exception_with_expected('Extra lines after Graph ' +
+                    '#{0} (line 1 says the number of graphs is {0}).'.
+                    format(num_cases), 'Expecting EOF.')
+
+        return graphs
+    def read_input_graph(self):
+        nums = self.read_numbers('Cannot parse the number of edges.', 1)
+
+        num_edges = nums[0]
+        if num_edges > config.MAX_NUM_EDGES:
+            raise self.exception('Number of edges cannot '+
+                    'exceed {0}.'.format(config.MAX_NUM_EDGES))
+        g = Graph()
+        v_added = {}
+        for i in range(num_edges):
+            nums = self.read_numbers('Cannot parse the next edge.', 2)
+            v1 = nums[0]; v2 = nums[1];
+            if (v1 not in v_added):
+                v = g.add_vertex()
+                v_added[v1] = int(v)
+            if (v2 not in v_added):
+               v = g.add_vertex()
+               v_added[v2] = int(v)
+            v1_obj = g.vertex(v_added[v1])
+            v2_obj = g.vertex(v_added[v2])
+            g.add_edge(v1_obj, v2_obj)
+
+        names = g.new_vertex_property("int")
+        for name, index in v_added.iteritems():
+            names[g.vertex(index)] = int(name)
+        g.vertex_properties["names"] = names
+        return g
+
 
 class InFileReader(Reader):
     def read_input_file(self):
