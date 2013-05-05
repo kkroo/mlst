@@ -1,6 +1,6 @@
 import config
 import graph
-from graph_tool.all import *
+from ugraph import *
 import re
 
 NUMBER_FORMAT_REGEXP = [None
@@ -69,6 +69,8 @@ class Reader:
                 raise self.exception_with_expected('{0} ({1})'.format(message,
                     e), NUMBER_EXPECTED_MESSAGE[n])
         return nums
+
+
 class GraphToolInFileReader(Reader):
     def read_input_file(self):
         nums = self.read_numbers('Cannot parse the number of input graphs.', 1)
@@ -95,25 +97,19 @@ class GraphToolInFileReader(Reader):
         if num_edges > config.MAX_NUM_EDGES:
             raise self.exception('Number of edges cannot '+
                     'exceed {0}.'.format(config.MAX_NUM_EDGES))
-        g = Graph(directed=False)
+        g = UGraph()
         v_added = {}
         for i in range(num_edges):
             nums = self.read_numbers('Cannot parse the next edge.', 2)
-            v1 = nums[0]; v2 = nums[1];
-            if (v1 not in v_added):
-                v = g.add_vertex()
-                v_added[v1] = int(v)
-            if (v2 not in v_added):
-               v = g.add_vertex()
-               v_added[v2] = int(v)
-            v1_obj = g.vertex(v_added[v1])
-            v2_obj = g.vertex(v_added[v2])
+            v1 = int(nums[0]); v2 = int(nums[1]);
+            v1_obj = g.find_vertex(v1)
+            v2_obj = g.find_vertex(v2)
+            if (v1_obj is None):
+                v1_obj = g.add_vertex(v1)
+            if (v2_obj is None):
+               v2_obj = g.add_vertex(v2)
             g.add_edge(v1_obj, v2_obj)
 
-        names = g.new_vertex_property("int")
-        for name, index in v_added.iteritems():
-            names[g.vertex(index)] = int(name)
-        g.vertex_properties["names"] = names
         return g
 
 
