@@ -123,48 +123,49 @@ def count_neighbours_notin(r,T_i):
 
     
 def expand_case_a(u, T_i, g):
-    t_names = T_i.vertex_properties["names"].a
+    t_names_map = T_i.vertex_properties["names"]
+    t_names = {}
+    for i in range(len(t_names_map.a)):
+        v = T_i.vertex(i)
+        t_names[t_names_map[v]] = v
+
     g_names = g.vertex_properties["names"]
-    v_obj = find_name_in_T(t_names, u)
+    v_obj = t_names[g_names[u]] 
     for c in u.all_neighbours():
         child = g_names[c]
-        if not check_stupid_c_array(t_names, child):
+        if child not in t_names:
             nvert = T_i.add_vertex()
-            t_names[nvert] = child
+            t_names_map[nvert] = child
+            t_names[child] = nvert
             T_i.add_edge(v_obj, nvert)
             for e in c.all_neighbours():
                 grandchild = g_names[e]
-                if not check_stupid_c_array(t_names, grandchild):
+                if grandchild not in t_names:
                     gverty = T_i.add_vertex()
-                    t_names[gverty] = grandchild
-                    T_i.add_edge(nvert, qverty)
+                    t_names_map[gverty] = grandchild
+                    t_names[grandchild] = gverty
+                    T_i.add_edge(nvert, gverty)
     return T_i
 
 def expand_case_b(u, T_i, g):
-    t_names = T_i.vertex_properties["names"].a
+    t_names_map = T_i.vertex_properties["names"]
+    t_names_map_a = t_names_map.a
+    t_names = {}
+    for i in range(len(t_names_map_a)):
+        v = T_i.vertex(i)
+        t_names[t_names_map[v]] = v
+
     g_names = g.vertex_properties["names"]
-    v_obj = find_name_in_T(t_names, u)
-    for i in range(len(t_names)):
-        if t_names[i] == v:
-            v_obj = T_i.vertex(i)
-            break
+    u_obj = t_names[g_names[u]]
     for c in u.all_neighbours():
         name = g_names[c]
-        if not check_stupid_c_array(t_names, name):
+        if name not in t_names:
             nvert = T_i.add_vertex()
-            t_names[n_vert] = name
-            T_i.add_edge(v_obj, nvert)
+            print nvert
+            t_names_map[nvert] = name
+            t_names[name] = nvert
+            T_i.add_edge(u_obj, nvert)
     return T_i
-
-def find_name_in_T(prop, inp):
-    for i in range(len(prop)):
-        if prop[i] == inp:
-            return T_i.vertex(i)
-            
-def check_stupid_c_array(stupid, inp):
-    for i in range(len(stupid)):
-        if stupid[i] == inp:
-            return True
 
 
 def find_mlst(g):
