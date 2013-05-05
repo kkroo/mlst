@@ -66,10 +66,48 @@ def expandable_leaf_highest_priority(v, T_i, g):
     return None
 
 def expand_case_a(u, T_i, g):
-    return None
+    t_names = T_i.vertex_properties["names"].a
+    g_names = g.vertex_properties["names"]
+    v_obj = find_name_in_T(t_names, u)
+    for c in u.all_neighbours():
+        child = g_names[c]
+        if not check_stupid_c_array(t_names, child):
+            nvert = T_i.add_vertex()
+            t_names[nvert] = child
+            T_i.add_edge(v_obj, nvert)
+            for e in c.all_neighbours():
+                grandchild = g_names[e]
+                if not check_stupid_c_array(t_names, grandchild):
+                    gverty = T_i.add_vertex()
+                    t_names[gverty] = grandchild
+                    T_i.add_edge(nvert, qverty)
+    return T_i
 
 def expand_case_b(u, T_i, g):
-    return None
+    t_names = T_i.vertex_properties["names"].a
+    g_names = g.vertex_properties["names"]
+    v_obj = find_name_in_T(t_names, u)
+    for i in range(len(t_names)):
+        if t_names[i] == v:
+            v_obj = T_i.vertex(i)
+            break
+    for c in u.all_neighbours():
+        name = g_names[c]
+        if not check_stupid_c_array(t_names, name):
+            nvert = T_i.add_vertex()
+            t_names[n_vert] = name
+            T_i.add_edge(v_obj, nvert)
+    return T_i
+
+def find_name_in_T(prop, inp):
+    for i in range(len(prop)):
+        if prop[i] == inp:
+            return T_i.vertex(i)
+            
+def check_stupid_c_array(stupid, inp):
+    for i in range(len(stupid)):
+        if stupid[i] == inp:
+            return True
 
 
 def find_mlst(g):
