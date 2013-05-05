@@ -59,20 +59,19 @@ def expandable_leaf_highest_priority(T_i, g):
             if r.out_degree() >= 3:
                count = count_neighbours_notin(r,T_i)
             if count >= 2:
-                    return v
+                    return (r,2)
             if r.out_degree() == 2:
                 for y in r.all_neighbours():
                     count = count_neighbours_notin(y,T_i)
                     if count > 2:
-                        return v
+                        return (r,1)
                     else:
                         if count == 2:
                             last_prio.append[v]
                 if last_prio is not None:
-                    return last_prio[0]
+                    return (last_prio[0],3)
                 else: 
                     return None
-
 
 
 
@@ -90,7 +89,6 @@ def count_neighbours_notin(r,T_i):
 
 
     
-
 def expand_case_a(u, T_i, g):
     return None
 
