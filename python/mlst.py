@@ -29,18 +29,14 @@ def output_graphs(graphs):
         for e in g.edges():
            print("{0} {1}".format(v_names[e.source()],v_names[e.target()]))
 
-def vertices_deg_k(k,g):
+def vertices_deg_k(k,g,find_one=False):
     result = []
     for v in g.vertices():
         if v.out_degree() >= k:
             result.append(v)
+            if find_one:
+                break
     return result
-
-def vertex_deg_k(k,g):
-    for v in g.vertices():
-        if v.out_degree() >= k:
-            return v
-    return None
     
 def is_spanning_tree(g):
     num_vertices = g.num_vertices()
