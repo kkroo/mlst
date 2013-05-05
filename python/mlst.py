@@ -2,6 +2,7 @@
 import config
 import reader
 from ugraph import *
+from graph_tool.all import *
 import sys
 
 def load_graphs():
@@ -24,17 +25,16 @@ def load_graphs():
 def output_graphs(graphs):
     print(len(graphs))
     for i, g in enumerate(graphs):
-        print(str(g.num_edges()) + " " + str(is_spanning_tree(g)))
-        for e in g.edges():
-           print("{0} {1}".format(g.find_name( e.source() ), g.find_name( e.target() ) ))
+        g.output()
 
-def vertices_deg_k(k,g,find_one=False):
+def vertices_deg_k(k,g,find_one=False, exact=False):
     result = []
     for v in g.vertices():
-        if v.out_degree() >= k:
-            result.append(v)
-            if find_one:
-                break
+        if (not exact and v.out_degree() >= k) or (exact and v.out_degree() == k):
+           if (v.is_valid()):
+                result.append(v)
+                if find_one:
+                    break
     return result
     
 def is_spanning_tree(g):
@@ -44,6 +44,7 @@ def is_spanning_tree(g):
         return False
     if len(vertices_deg_k(1, g)) != num_vertices:
         return False
+    print "\tThe spanning tree has {0} leaves".format(len(vertices_deg_k(1, g, exact=True)))
     return True
 
 def construct_T_i(v,g):
@@ -60,11 +61,11 @@ def expandable_leaf_highest_priority(T_i, g):
     for v in T_i.vertices():
         r = g.find_vertex( T_i.find_name(v) ) #find corresponding vertex in g
         count = 0
-        if v.out_degree() == 1:
+        if r is not None and v.out_degree() == 1:
             if r.out_degree() >= 3:
                 count = 0
                 for c in r.all_neighbours():
-                    if T_i.find_vertex( g.find_name(c) ) is not None:
+                    if T_i.find_vertex( g.find_name(c) ) is None:
                         count+=1
                     if count >= 2:
                         return (r,2)
@@ -72,7 +73,7 @@ def expandable_leaf_highest_priority(T_i, g):
                 for y in r.all_neighbours():
                     count = 0
                     for c in y.all_neighbours():
-                        if T_i.find_vertex( g.find_name(c) ) :
+                        if T_i.find_vertex( g.find_name(c) ) is None:
                             count+=1
                         if count > 2:
                             return (r,1)
@@ -87,21 +88,22 @@ def expandable_leaf_highest_priority(T_i, g):
 def expand_case_a(u, T_i, g):
     u_T_i = T_i.find_vertex( g.find_name(u) )
     for c in u.all_neighbours():
-        if T_i.find_vertex( g.find_name(c) ) is not None:
-            nvert = T_i.add_vertex( g.find_name(c) )
-            T_i.add_edge(u_T_i, nvert)
-            for e in c.all_neighbours():
-                if T_i.find_vertex( g.find_name(e) ) is not None:
-                    gverty = T_i.add_vertex( g.find_name(e) )
-                    T_i.add_edge(nvert, gverty)
+        if T_i.find_vertex( g.find_name(c) ) is None:
+            child = T_i.add_vertex( g.find_name(c) )
+            T_i.add_edge(u_T_i, child)
+            for d in c.all_neighbours():
+                grand_child_name = g.find_name(d)
+                if T_i.find_vertex( grand_child_name ) is None:
+                    grand_child = T_i.add_vertex( grand_child_name )
+                    T_i.add_edge(child, grand_child)
     return T_i
 
 def expand_case_b(u, T_i, g):
     u_T_i = T_i.find_vertex( g.find_name(u) )
     for c in u.all_neighbours():
-        if T_i.find_vertex( g.find_name(c) ) is not None:
-            nvert = T_i.add_vertex( g.find_name(c) )
-            T_i.add_edge(u_T_i, nvert)
+        if T_i.find_vertex( g.find_name(c) ) is None:
+            child = T_i.add_vertex( g.find_name(c) )
+            T_i.add_edge(u_T_i, child)
     return T_i
 
 
@@ -110,23 +112,26 @@ def find_mlst(g):
     v_deg_three = vertices_deg_k(3, g, True)
     while len(v_deg_three) != 0:
         v = v_deg_three[0]
+        print "Our vertex of deg >= 3 is {0} = {1}".format(g.find_name(v), repr(v))
         T_i = construct_T_i(v, g)
-        print "Our T_i is a graph with {0} vertices and {1} edges".format(T_i.num_vertices(), T_i.num_edges())
+        print "\tOur T_i is a graph with {0} vertices and {1} edges".format(T_i.num_vertices(), T_i.num_edges())
         expandable_leaf = expandable_leaf_highest_priority(T_i, g)
-        print "Our expandable leaf is {0} with case {1}".format(g.find_name(expandable_leaf[0]), expandable_leaf[1])
         while expandable_leaf is not None:
+            print "\tOur expandable leaf is {0} with case {1}".format(g.find_name(expandable_leaf[0]), expandable_leaf[1])
             u = expandable_leaf[0]
             case = expandable_leaf[1]
             if (case == 2):
                 T_i = expand_case_b(u, T_i, g)
             else:
                 T_i = expand_case_a(u, T_i, g)
-            print "Our expanded T_i is a graph with {0} vertices and {1} edges".format(T_i.num_vertices(), T_i.num_edges())
+            print "\tOur expanded T_i is a graph with {0} vertices and {1} edges".format(T_i.num_vertices(), T_i.num_edges())
             expandable_leaf = expandable_leaf_highest_priority(T_i, g)
-            break
-        break
-        #Merge f and T_i
+        f.union(T_i)
+        print "\tOur f is a graph with {0} vertices and {1} edges".format(f.num_vertices(), f.num_edges())
+        g.intersect(T_i)
+        print "\tOur g is a graph with {0} vertices and {1} edges".format(g.num_vertices(), g.num_edges())
         #Remove from g all vertices in T_i and all edges incident to them
+        v_deg_three = vertices_deg_k(3, g, True)
     #Connect the trees in F and all vertices not in F to form a spanning tree T
     return f
 
@@ -140,6 +145,5 @@ if __name__ == '__main__':
         if (is_spanning_tree(mlst)):
             mlsts.append(mlst)
         else:
-            print "ERROR: Graph {0} is not a spanning tree!".format(i)
-            mlsts.append(mlst)
+            print "\tERROR: Graph {0} is not a spanning tree!".format(i)
     output_graphs(mlsts)
