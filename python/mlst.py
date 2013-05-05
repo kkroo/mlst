@@ -50,8 +50,46 @@ def is_spanning_tree(g):
 def consrtruct_T_i(v,g):
     return None
 
-def expandable_leaf_highest_priority(v, T_i, g):
-    return None
+def expandable_leaf_highest_priority(T_i, g):
+    g_names = g.vertex_properties["names"]
+    last_prio = []
+    for v in T_i.vertices():
+        r = g_names[v]
+        if v.out_degree() == 1:
+            if r.out_degree() >= 3:
+               count = count_neighbours_notin(r,T_i)
+            if count >= 2:
+                    return v
+            if r.out_degree() == 2:
+                for y in r.all_neighbours():
+                    count = count_neighbours_notin(y,T_i)
+                    if count > 2:
+                        return v
+                    else:
+                        if count == 2:
+                            last_prio.append[v]
+                if last_prio is not None:
+                    return last_prio[0]
+                else: 
+                    return None
+
+
+
+
+
+        
+def count_neighbours_notin(r,T_i):
+    T_i_names = T_i.vertex_properties["names"]
+    vals = T_i_names.values()
+    count = 0
+    for c in r.all_neighbours():
+        if c not in vals:
+            count+=1
+    return count
+            
+
+
+    
 
 def expand_case_a(u, T_i, g):
     return None
@@ -61,7 +99,7 @@ def expand_case_b(u, T_i, g):
 
 
 def find_mlst(g):
-    f = new Graph(directed=False)
+    f = Graph(directed=False)
     v_deg_three = vertices_deg_k(3, g, True)
     while len(v_deg_three) != 0:
         v = v_deg_three[0]
@@ -73,7 +111,7 @@ def find_mlst(g):
             case = expandable_leaf[1]
             if (case == 2):
                 expand_case_b(u, T_i, g)
-            else
+            else:
                 expand_case_a(u, T_i, g)
     return g
 
