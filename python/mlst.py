@@ -62,9 +62,45 @@ def construct_T_i(v,g):
     T_i.vertex_properties["names"] = new_names
     return T_i
 
-def expandable_leaf_highest_priority(v, T_i, g):
-    return None
+def expandable_leaf_highest_priority(T_i, g):
+    g_names = g.vertex_properties["names"]
+    last_prio = []
+    for v in T_i.vertices():
+        r = g_names[v]
+        if v.out_degree() == 1:
+            if r.out_degree() >= 3:
+               count = count_neighbours_notin(r,T_i)
+            if count >= 2:
+                    return (r,2)
+            if r.out_degree() == 2:
+                for y in r.all_neighbours():
+                    count = count_neighbours_notin(y,T_i)
+                    if count > 2:
+                        return (r,1)
+                    else:
+                        if count == 2:
+                            last_prio.append[v]
+                if last_prio is not None:
+                    return (last_prio[0],3)
+                else: 
+                    return None
 
+
+
+
+        
+def count_neighbours_notin(r,T_i):
+    T_i_names = T_i.vertex_properties["names"]
+    vals = T_i_names.values()
+    count = 0
+    for c in r.all_neighbours():
+        if c not in vals:
+            count+=1
+    return count
+            
+
+
+    
 def expand_case_a(u, T_i, g):
     t_names = T_i.vertex_properties["names"].a
     g_names = g.vertex_properties["names"]
