@@ -175,24 +175,25 @@ def find_mlst(g):
     while len(v_deg_three) != 0:
         v = v_deg_three[0]
         T_i = construct_T_i(v, g)
-
+        #print "Our T_i is a graph with {0} vertices and {1} edges".format(T_i.num_vertices(), T_i.num_edges())
         expandable_leaf = expandable_leaf_highest_priority(T_i, g)
-        print expandable_leaf
-        print "Our expandable leaf is {0} with case {1}".format(g_names_map[expandable_leaf[0]], expandable_leaf[1])
+        #print expandable_leaf
+   #     print "Our expandable leaf is {0} with case {1}".format(g_names_map[expandable_leaf[0]], expandable_leaf[1])
         while expandable_leaf is not None:
             u = expandable_leaf[0]
             case = expandable_leaf[1]
             if (case == 2):
-                expand_case_b(u, T_i, g)
+                T_i = expand_case_b(u, T_i, g)
             else:
-                expand_case_a(u, T_i, g)
-            expandable_leaf = (v, T_i, g)
+                T_i = expand_case_a(u, T_i, g)
+            print "Our expanded T_i is a graph with {0} vertices and {1} edges".format(T_i.num_vertices(), T_i.num_edges())
+            expandable_leaf = expandable_leaf_highest_priority(T_i, g)
             break
         break
         #Merge f and T_i
         #Remove from g all vertices in T_i and all edges incident to them
     #Connect the trees in F and all vertices not in F to form a spanning tree T
-    return g
+    return f
 
 # To run this program run: python mlst.py file.in
 if __name__ == '__main__':
