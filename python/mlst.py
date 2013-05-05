@@ -15,14 +15,18 @@ def load_graphs():
         print("Loaded {0} graphs from file '{1}' sucessfully.\n".format(len(graphs), infile))
 
     except IOError as e:
-        print_error("Error reading '{0}' ({1}).\n".format(infile, e))
+        print("Error reading '{0}' ({1}).\n".format(infile, e))
     except reader.ReaderException as e:
-        print_error("({0}) {1}\n".format(infile, e))
+        print("({0}) {1}\n".format(infile, e))
 
     return graphs
 def vertices_deg_k(k,G):
-    # return all vertices of deg > k
-    return None
+    result = []
+    for v in G.vertices():
+        if v.out_degree() >= k:
+            result.append(v)
+    return result
+    # return an array of vertices of deg >= k
 def tree(G):
     return None
 
