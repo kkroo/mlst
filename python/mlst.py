@@ -45,17 +45,17 @@ def is_spanning_tree(g):
         return False
     return True
 
-def mlst(g):
-    return None
+def find_mlst(g):
+    return g
 
 # To run this program run: python mlst.py file.in
 if __name__ == '__main__':
     graphs = load_graphs();
     mlsts = []
     for i, g in enumerate(graphs):
-        mlst = mlst(g)
+        mlst = find_mlst(g)
         if (is_spanning_tree(mlst)):
             mlsts.append(mlst)
         else:
-            print "ERROR: Graph {0} is not a spanning tree!".format()
-    output_graphs(mlst)
+            print "ERROR: Graph {0} is not a spanning tree!".format(i)
+    output_graphs(mlsts)
