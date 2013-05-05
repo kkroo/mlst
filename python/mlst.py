@@ -63,38 +63,59 @@ def construct_T_i(v,g):
     return T_i
 
 def expandable_leaf_highest_priority(T_i, g):
-    g_names = g.vertex_properties["names"]
-    last_prio = []
+    t_names_map = T_i.vertex_properties["names"].a
+    t_names = {}
+    for i in range(len(t_names_map)):
+        v = T_i.vertex(i)
+        t_names[t_names_map[v]] = v
+
+    g_names_map = g.vertex_properties["names"].a
+    g_names = {}
+    for i in range(len(g_names_map)):
+        v = g.vertex(i)
+        g_names[g_names_map[v]] = v
+
+    low_priority = None
     for v in T_i.vertices():
-        r = g_names[v]
+        r = g_names[t_names_map[v]] #find corresponding vertex in g
+        count = 0
         if v.out_degree() == 1:
             if r.out_degree() >= 3:
-               count = count_neighbours_notin(r,T_i)
-            if count >= 2:
-                    return (r,2)
+                count = 0
+                for c in r.all_neighbours():
+                    if g_names_map[c] not in t_names:
+                        count+=1
+                    if count >= 2:
+                        return (r,2)
             if r.out_degree() == 2:
                 for y in r.all_neighbours():
-                    count = count_neighbours_notin(y,T_i)
-                    if count > 2:
-                        return (r,1)
-                    else:
+                    count = 0
+                    for c in y.all_neighbours():
+                        if g_names_map[c] not in t_names:
+                            count+=1
+                        if count > 2:
+                            return (r,1)
                         if count == 2:
-                            last_prio.append[v]
-                if last_prio is not None:
-                    return (last_prio[0],3)
+                            low_priority = r
+                if low_priority is not None:
+                    return (low_priority,3)
                 else: 
                     return None
 
 
 
-
+def find_vertex_by_name(v,g):
+    names = g.vertex_properties["names"].a
+    for i in range(len(names)):
+        if names[i] == v:
+            return g.vertex(i)
+    return None
         
 def count_neighbours_notin(r,T_i):
-    T_i_names = T_i.vertex_properties["names"]
-    vals = T_i_names.values()
+
     count = 0
     for c in r.all_neighbours():
-        if c not in vals:
+        if g_names_map[c] not in t_names:
             count+=1
     return count
             
@@ -147,13 +168,16 @@ def check_stupid_c_array(stupid, inp):
 
 
 def find_mlst(g):
+    g_names_map = g.vertex_properties["names"]
     f = Graph(directed=False)
     v_deg_three = vertices_deg_k(3, g, True)
     while len(v_deg_three) != 0:
         v = v_deg_three[0]
         T_i = construct_T_i(v, g)
-        print "Build T_i with root {0}, {1} vertices and {2} edges".format(v, T_i.num_vertices(), T_i.num_edges())
-        expandable_leaf = (v, T_i, g)
+
+        expandable_leaf = expandable_leaf_highest_priority(T_i, g)
+        print expandable_leaf
+        print "Our expandable leaf is {0} with case {1}".format(g_names_map[expandable_leaf[0]], expandable_leaf[1])
         while expandable_leaf is not None:
             u = expandable_leaf[0]
             case = expandable_leaf[1]
