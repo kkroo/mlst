@@ -47,7 +47,34 @@ def is_spanning_tree(g):
         return False
     return True
 
+def consrtruct_T_i(v,g):
+    return None
+
+def expandable_leaf_highest_priority(v, T_i, g):
+    return None
+
+def expand_case_a(u, T_i, g):
+    return None
+
+def expand_case_b(u, T_i, g):
+    return None
+
+
 def find_mlst(g):
+    f = new Graph(directed=False)
+    v_deg_three = vertices_deg_k(3, g, True)
+    while len(v_deg_three) != 0:
+        v = v_deg_three[0]
+        T_i = construct_T_i(v, g)
+
+        expandable_leaf = (v, T_i, g)
+        while expandable_leaf is not None:
+            u = expandable_leaf[0]
+            case = expandable_leaf[1]
+            if (case == 2):
+                expand_case_b(u, T_i, g)
+            else
+                expand_case_a(u, T_i, g)
     return g
 
 # To run this program run: python mlst.py file.in
