@@ -20,17 +20,32 @@ def load_graphs():
         print_error("({0}) {1}\n".format(infile, e))
 
     return graphs
+
+def output_graphs(graphs):
+    print(len(graphs))
+    for i, g in enumerate(graphs):
+        print(g.num_edges())
+        v_names = g.vertex_properties["names"]
+        for e in g.edges():
+           print("{0} {1}".format(v_names[e.source()],v_names[e.target()]))
+
 def vertices_deg_k(k,G):
     # return all vertices of deg > k
     return None
+    
+def is_spanning_tree(G):
+    num_vertices = G.num_vertices()
+    num_edges = g.num_edges()
+    if num_edges != num_vertices - 1:
+        return False
+    if len(vertices_deg_k(1, G)) != num_vertices:
+        return False
+    return True
+
 def tree(G):
     return None
 
 # To run this program run: python mlst.py file.in
 if __name__ == '__main__':
     graphs = load_graphs();
-    for i, g in enumerate(graphs):
-        print(g.num_edges())
-        v_names = g.vertex_properties["names"]
-        for e in g.edges():
-           print("{0} {1}".format(v_names[e.source()],v_names[e.target()]))
+    output_graphs(graphs)
