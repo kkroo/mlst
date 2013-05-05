@@ -24,14 +24,14 @@ def load_graphs():
 def output_graphs(graphs):
     print(len(graphs))
     for i, g in enumerate(graphs):
-        print(g.num_edges())
+        print(str(g.num_edges()) + " " + str(is_spanning_tree(g)))
         v_names = g.vertex_properties["names"]
         for e in g.edges():
            print("{0} {1}".format(v_names[e.source()],v_names[e.target()]))
 
-def vertices_deg_k(k,G):
+def vertices_deg_k(k,g):
     result = []
-    for v in G.vertices():
+    for v in g.vertices():
         if v.out_degree() >= k:
             result.append(v)
     return result
@@ -42,19 +42,26 @@ def vertex_deg_k(k,g):
             return v
     return None
     
-def is_spanning_tree(G):
-    num_vertices = G.num_vertices()
+def is_spanning_tree(g):
+    num_vertices = g.num_vertices()
     num_edges = g.num_edges()
     if num_edges != num_vertices - 1:
         return False
-    if len(vertices_deg_k(1, G)) != num_vertices:
+    if len(vertices_deg_k(1, g)) != num_vertices:
         return False
     return True
 
-def tree(G):
+def mlst(g):
     return None
 
 # To run this program run: python mlst.py file.in
 if __name__ == '__main__':
     graphs = load_graphs();
-    output_graphs(graphs)
+    mlsts = []
+    for i, g in enumerate(graphs):
+        mlst = mlst(g)
+        if (is_spanning_tree(mlst)):
+            mlsts.append(mlst)
+        else:
+            print "ERROR: Graph {0} is not a spanning tree!".format()
+    output_graphs(mlst)
