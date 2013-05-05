@@ -35,6 +35,12 @@ def vertices_deg_k(k,G):
         if v.out_degree() >= k:
             result.append(v)
     return result
+
+def vertex_deg_k(k,g):
+    for v in g.vertices():
+        if v.out_degree() >= k:
+            return v
+    return None
     
 def is_spanning_tree(G):
     num_vertices = G.num_vertices()
