@@ -129,7 +129,7 @@ def make_leafy_forest(g):
             expandable_leaf = expandable_leaf_highest_priority(T_i, g)
         f.union(T_i)
         print "\tOur f is a graph with {0} vertices and {1} edges".format(f.num_vertices(), f.num_edges())
-        g.intersect(T_i)
+        g.difference(T_i)
         print "\tOur g is a graph with {0} vertices and {1} edges".format(g.num_vertices(), g.num_edges())
         #Remove from g all vertices in T_i and all edges incident to them
         v_deg_three = vertices_deg_k(3, g, True)

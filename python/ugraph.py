@@ -45,7 +45,7 @@ class UGraph(Graph):
                new_edge = True
             if (new_edge is True):
                 self.add_edge(v1_obj, v2_obj)
-    def intersect(self, g):   
+    def difference(self, g):   
         for v in g.vertices():
             v_name = g.find_name(v)
             v_obj = self.find_vertex(v_name)
