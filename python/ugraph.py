@@ -1,4 +1,46 @@
 from graph_tool.all import *
+from reader import *
+
+class GraphToolInFileReader(Reader):
+    def read_input_file(self):
+        nums = self.read_numbers('Cannot parse the number of input graphs.', 1)
+
+        num_cases = nums[0]
+        graphs = []
+        for i in range(num_cases):
+            self.case_num = i+1
+            g = self.read_input_graph()
+            graphs.append(g)
+
+        self.case_num += 1
+        self.readline()
+        if len(self.line) > 0:
+            raise self.exception_with_expected('Extra lines after Graph ' +
+                    '#{0} (line 1 says the number of graphs is {0}).'.
+                    format(num_cases), 'Expecting EOF.')
+
+        return graphs
+    def read_input_graph(self):
+        nums = self.read_numbers('Cannot parse the number of edges.', 1)
+
+        num_edges = nums[0]
+        if num_edges > config.MAX_NUM_EDGES:
+            raise self.exception('Number of edges cannot '+
+                    'exceed {0}.'.format(config.MAX_NUM_EDGES))
+        g = UGraph()
+        v_added = {}
+        for i in range(num_edges):
+            nums = self.read_numbers('Cannot parse the next edge.', 2)
+            v1 = int(nums[0]); v2 = int(nums[1]);
+            v1_obj = g.find_vertex(v1)
+            v2_obj = g.find_vertex(v2)
+            if (v1_obj is None):
+                v1_obj = g.add_vertex(v1)
+            if (v2_obj is None):
+               v2_obj = g.add_vertex(v2)
+            g.add_edge(v1_obj, v2_obj)
+
+        return g
 
 class UGraph(Graph):
     def __init__(self):
@@ -56,9 +98,12 @@ class UGraph(Graph):
                 self.reindex_names()
 
     def output(self):
-        print(str(self.num_edges()))
+        ret = ""
+        ret += (str(self.num_edges())) + "\n"
         for e in self.edges():
-           print("{0} {1}".format(self.find_name( e.source() ), self.find_name( e.target() ) ))
+           ret += ("{0} {1}\n".format(self.find_name( e.source() ), self.find_name( e.target() ) ))
+        return ret
+
     def copy(self):
         new_u = UGraph()
         for v in self.vertices():
