@@ -139,7 +139,7 @@ def make_leafy_forest(g):
         print "\tAdding vertex {0}".format(v_obj)
     return f
 
-def scc(f):
+def make_scc(f):
     visited = []
     scc = []
     scc_count = -1
@@ -154,15 +154,99 @@ def scc(f):
     return scc
 
 def make_spanning(f, g):
-    f_scc = scc(f)
+    f_scc = make_scc(f)
     non_leaves = Set([f.find_name(v) for v in vertices_deg_k(2, f)])
+    a = False
+    b = False
+    c = False
     while len(f_scc) > 1:
+        non_leaves_in_first_scc = non_leaves.intersection(f_scc[0])
         non_leaves_not_in_first_scc = non_leaves.difference(f_scc[0])
-        for v in non_leaves_not_in_first_scc:
-            v_scc = -1
-            v_g = g.find_vertex(v)
-            if v_g.out_degree() > 1:
-
+        leaves_not_in_first_scc = Set([v for scc in f_scc for v in scc]).difference(non_leaves).difference(f_scc[0])
+        foo = False
+        if a == False:
+            for v in non_leaves_in_first_scc:
+                if foo == True:
+                    break
+                for e in g.find_vertex(v).all_edges():
+                    dest = e.source() if g.find_name(e.source()) != v else e.target()
+                    dest_name = g.find_name(dest)
+                    if dest_name in non_leaves_not_in_first_scc:
+                        f.add_edge(f.find_vertex(v), f.find_vertex(dest_name))
+                        dest_cc = 0
+                        for i in range(1, len(f_scc)):
+                            if dest_name in f_scc[i]:
+                                dest_cc = i 
+                        f_scc[0] = f_scc[0].union(f_scc[dest_cc])
+                    #    print "Adding edge ({0},{1}) between scc 0 and {2}".format(v, dest_name, dest_cc)
+                        del f_scc[dest_cc]
+                        foo = True
+                        break
+        a = True
+     #   print "A is true"
+        if b == False and len(f_scc) > 1:
+            for v in f_scc[0].difference(non_leaves_in_first_scc):
+                if foo == True:
+                    break
+                for e in g.find_vertex(v).all_edges():
+                    dest = e.source() if g.find_name(e.source()) != v else e.target()
+                    dest_name = g.find_name(dest)
+                    if dest_name in non_leaves_not_in_first_scc:
+                        f.add_edge(f.find_vertex(v), f.find_vertex(dest_name))
+                        dest_cc = 0
+                        for i in range(1, len(f_scc)):
+                            if dest_name in f_scc[i]:
+                                dest_cc = i 
+                        f_scc[0] = f_scc[0].union(f_scc[dest_cc])
+                        del f_scc[dest_cc]
+                  #      print "Adding edge ({0},{1}) between scc 0 and {2}".format(v, dest_name, dest_cc)
+                        foo = True
+                        break
+        b = True
+     #   print "B is true"  
+        if c == False and len(f_scc) > 1:
+            for v in non_leaves_in_first_scc:
+                if foo == True:
+                    break
+                for e in g.find_vertex(v).all_edges():
+                    dest = e.source() if g.find_name(e.source()) != v else e.target()
+                    dest_name = g.find_name(dest)
+                #    print "Edge ({0},{1}) and dest {2} and v={3}".format(g.find_name(e.source()), g.find_name(e.target()), dest_name, v)
+                #    print leaves_not_in_first_scc
+                    if dest_name in leaves_not_in_first_scc:
+                        f.add_edge(f.find_vertex(v), f.find_vertex(dest_name))
+                        dest_cc = 0
+                        for i in range(1, len(f_scc)):
+                            if dest_name in f_scc[i]:
+                                dest_cc = i 
+                        f_scc[0] = f_scc[0].union(f_scc[dest_cc])
+                 #       print "Adding edge ({0},{1}) between scc 0 and {2}".format(v, dest_name, dest_cc)
+                        del f_scc[dest_cc]
+                        foo = True
+                        break
+        c = True
+      #  print "C is true"
+        if len(f_scc) > 1:
+            for v in f_scc[0].difference(non_leaves_in_first_scc):
+                if foo == True:
+                    break
+                for e in g.find_vertex(v).all_edges():
+                    dest = e.source() if g.find_name(e.source()) != v else e.target()
+                    dest_name = g.find_name(dest)
+                    if dest_name in leaves_not_in_first_scc:
+                        f.add_edge(f.find_vertex(v), f.find_vertex(dest_name))
+                        dest_cc = 0
+                        for i in range(1, len(f_scc)):
+                            if dest_name in f_scc[i]:
+                                dest_cc = i 
+                        f_scc[0] = f_scc[0].union(f_scc[dest_cc])
+                        del f_scc[dest_cc]
+                   #     print "Adding edge ({0},{1}) between scc 0 and {2}".format(v, dest_name, dest_cc)
+                        foo = True
+                        break
+        break
+     #   print "SCC length = {0}".format(len(f_scc))
+    return f
 
 
 def find_mlst(g):
