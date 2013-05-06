@@ -57,3 +57,17 @@ class UGraph(Graph):
         print(str(self.num_edges()))
         for e in self.edges():
            print("{0} {1}".format(self.find_name( e.source() ), self.find_name( e.target() ) ))
+    def copy(self):
+        new_u = UGraph()
+        for v in self.vertices():
+            new_u.add_vertex(self.find_name(v))
+        for e in self.edges():
+            new_u.add_edge(e.source(), e.target())
+        return new_u
+
+class SCCVisitor(DFSVisitor):
+    def __init__(self):
+        self.vertices = []
+
+    def discover_vertex(self, u):
+        self.vertices.append(u)

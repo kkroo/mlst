@@ -4,6 +4,7 @@ import reader
 from ugraph import *
 from graph_tool.all import *
 import sys
+from sets import Set
 
 def load_graphs():
     infile = config.DEFAULT_INPUT_FILE if len(sys.argv) <= 1 else sys.argv[1]
@@ -44,7 +45,7 @@ def is_spanning_tree(g):
         return False
     if len(vertices_deg_k(1, g)) != num_vertices:
         return False
-    print "\tThe spanning tree has {0} leaves".format(len(vertices_deg_k(1, g, exact=True)))
+    print "\tThe spanning tree has {0} vertices and {1} edges and {2} leaves".format(g.num_vertices(), g.num_edges(),len(vertices_deg_k(1, g, exact=True)))
     return True
 
 def construct_T_i(v,g):
@@ -107,7 +108,7 @@ def expand_case_b(u, T_i, g):
     return T_i
 
 
-def find_mlst(g):
+def make_leafy_forest(g):
     f = UGraph()
     v_deg_three = vertices_deg_k(3, g, True)
     while len(v_deg_three) != 0:
@@ -133,7 +134,39 @@ def find_mlst(g):
         #Remove from g all vertices in T_i and all edges incident to them
         v_deg_three = vertices_deg_k(3, g, True)
     #Connect the trees in F and all vertices not in F to form a spanning tree T
+    for v in g.vertices():
+        v_obj = f.add_vertex(g.find_name(v))
+        print "\tAdding vertex {0}".format(v_obj)
     return f
+
+def scc(f):
+    visited = []
+    scc = []
+    scc_count = -1
+    for v in f.vertices():
+        if v in visited:
+            continue
+        visitor = SCCVisitor()
+        dfs_search(f, v, visitor)
+        scc_count+=1
+        visited+=visitor.vertices
+        scc.append(Set([f.find_name(v) for v in visitor.vertices]))
+    return scc
+
+def make_spanning(f, g):
+    f_scc = scc(f)
+    non_leaves = Set([f.find_name(v) for v in vertices_deg_k(2, f)])
+    while len(f_scc) > 1:
+        non_leaves_not_in_first_scc = non_leaves.difference(f_scc[0])
+        for v in non_leaves_not_in_first_scc:
+            v_scc = -1
+            v_g = g.find_vertex(v)
+            if v_g.out_degree() > 1:
+
+
+
+def find_mlst(g):
+    return make_spanning(make_leafy_forest(g.copy()), g)
 
 # To run this program run: python mlst.py file.in
 if __name__ == '__main__':
