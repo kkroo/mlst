@@ -50,8 +50,10 @@ class UGraph(Graph):
             v_name = g.find_name(v)
             v_obj = self.find_vertex(v_name)
             if (v_obj is not None):
-                self.remove_vertex(v_obj, fast=True)
+                self.clear_vertex(v_obj)
+                self.remove_vertex(v_obj)
                 del self.inv_names[v_name]
+                self.reindex_names()
 
     def output(self):
         print(str(self.num_edges()))
@@ -62,7 +64,10 @@ class UGraph(Graph):
         for v in self.vertices():
             new_u.add_vertex(self.find_name(v))
         for e in self.edges():
-            new_u.add_edge(e.source(), e.target())
+            v1 = new_u.find_vertex(self.find_name(e.source()))
+            v2 = new_u.find_vertex(self.find_name(e.target()))
+            if (v1 is not None and v2 is not None and v1.is_valid() and v2.is_valid() ):
+                new_u.add_edge(v1, v2)
         return new_u
 
 class SCCVisitor(DFSVisitor):
