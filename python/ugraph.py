@@ -78,14 +78,11 @@ class UGraph(Graph):
             v2 = g.find_name( e.target() )
             v1_obj = self.find_vertex(v1)
             v2_obj = self.find_vertex(v2)
-            new_edge = False
             if (v1_obj is None):
                 v1_obj = self.add_vertex(v1)
-                new_edge = True
             if (v2_obj is None):
                v2_obj = self.add_vertex(v2)
-               new_edge = True
-            if (new_edge is True):
+            if (self.edge(v1_obj, v2_obj) is None):
                 self.add_edge(v1_obj, v2_obj)
     def difference(self, g):   
         for v in g.vertices():

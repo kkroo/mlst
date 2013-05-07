@@ -6,6 +6,11 @@ from graph_tool.all import *
 import sys
 from sets import Set
 
+"""
+This algorithm is based loosely off of the approximation described in the paper paper by Solis-Oba:
+    http://pdf.aminer.org/000/186/511/approximation_algorithm_for_finding_a_spanning_tree_with_maximum_number.pdf
+"""
+
 def vertices_deg_k(k,g,find_one=False, exact=False):
     result = []
     for v in g.vertices():
@@ -117,7 +122,6 @@ def make_scc(f):
 def make_spanning(f, g):
 
     def try_union (sources, dests):
-        #nonlocal f, g, f_scc, smallest_scc
         for v in sources:
             for e in g.find_vertex(v).all_edges():
                 dest = e.source() if g.find_name(e.source()) != v else e.target()
@@ -138,22 +142,21 @@ def make_spanning(f, g):
     f_scc = make_scc(f)
     while len(f_scc) > 1:
         scc_sizes = [ len(scc) for scc in f_scc ]
-        smallest_scc = scc_sizes.index(min(scc_sizes))
-
+        smallest_scc = scc_sizes.index(max(scc_sizes))
+        
         non_leaves = Set([f.find_name(v) for v in vertices_deg_k(2, f)])
-
         non_leaves_in_first_scc = non_leaves.intersection(f_scc[smallest_scc])
         non_leaves_not_in_first_scc = non_leaves.difference(f_scc[smallest_scc])
 
         leaves_in_first_scc = f_scc[smallest_scc].difference(non_leaves_in_first_scc)
-        leaves_not_in_first_scc = Set([v for scc in f_scc for v in scc]).difference(non_leaves).difference(f_scc[smallest_scc])
+        leaves_not_in_first_scc = Set([v for scc in f_scc for v in scc]).difference(non_leaves_not_in_first_scc)
 
         if try_union(non_leaves_in_first_scc, non_leaves_not_in_first_scc):
-            pass
+            continue
+        elif try_union(non_leaves_in_first_scc, leaves_not_in_first_scc):
+            continue
         elif try_union(leaves_in_first_scc, non_leaves_not_in_first_scc):
-            pass
-        elif try_union(non_leaves_in_first_scc, leaves_in_first_scc):
-            pass
+            continue
         else:
             try_union(leaves_in_first_scc, leaves_not_in_first_scc)
     return f
@@ -194,7 +197,7 @@ def is_spanning_tree(g):
         return False
     if len(vertices_deg_k(1, g)) != num_vertices:
         return False
-    print("\n\tThe spanning tree has {0} vertices and {1} edges and {2} leaves\n".format(g.num_vertices(), g.num_edges(),len(vertices_deg_k(1, g, exact=True))))
+    print("\tThe spanning tree has {0} vertices and {1} edges and {2} leaves\n".format(g.num_vertices(), g.num_edges(),len(vertices_deg_k(1, g, exact=True))))
     return True
 
 
