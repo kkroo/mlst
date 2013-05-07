@@ -31,31 +31,34 @@ def construct_T_i(v,g):
 
 def expandable_leaf_highest_priority(T_i, g):
     low_priority = None
-    for v in T_i.vertices():
-        r = g.find_vertex( T_i.find_name(v) ) #find corresponding vertex in g
-        count = 0
-        if r is not None and v.out_degree() == 1:
-            if r.out_degree() >= 3:
-                count = 0
-                for c in r.all_neighbours():
-                    if T_i.find_vertex( g.find_name(c) ) is None:
-                        count+=1
-                    if count >= 2:
-                        return (r,2)
-            if r.out_degree() == 2:
-                for y in r.all_neighbours():
-                    if T_i.find_vertex(g.find_name(y)) is not None:
-                        continue
+    MAX = 50 #the higher this number the more exhaustive the search
+    MIN = 3 #dont make this smaller than 3
+    for i in range(MAX, MIN - 1, -1):
+        for v in T_i.vertices():
+            r = g.find_vertex( T_i.find_name(v) ) #find corresponding vertex in g
+            count = 0
+            if r is not None and v.out_degree() == 1:
+                if r.out_degree() >= i:
                     count = 0
-                    for c in y.all_neighbours():
+                    for c in r.all_neighbours():
                         if T_i.find_vertex( g.find_name(c) ) is None:
                             count+=1
-                        if count > 2:
-                            return (r,1)
-                        if count == 2:
-                            low_priority = r
-                    if low_priority is not None:
-                        return (low_priority,3)
+                        if count >= i - 1:
+                            return (r,2)
+                if r.out_degree() == 2:
+                    for y in r.all_neighbours():
+                        if T_i.find_vertex(g.find_name(y)) is not None:
+                            continue
+                        count = 0
+                        for c in y.all_neighbours():
+                            if T_i.find_vertex( g.find_name(c) ) is None:
+                                count+=1
+                            if count >= i - 1:
+                                return (r,1)
+                            if count == 2 and i == MIN:
+                                low_priority = r
+                        if low_priority is not None:
+                            return (low_priority,3)
     return None
 
     
@@ -126,15 +129,15 @@ def make_spanning(f, g):
             for e in g.find_vertex(v).all_edges():
                 dest = e.source() if g.find_name(e.source()) != v else e.target()
                 dest_name = g.find_name(dest)
-                if (dest_name in f_scc[smallest_scc]):
+                if (dest_name in f_scc[largest_scc]):
                     continue
                 if dest_name in dests:
                     f.add_edge(f.find_vertex(v), f.find_vertex(dest_name))
                     dest_cc = None
                     for i in range(len(f_scc)):
-                        if dest_name in f_scc[i] and i != smallest_scc:
+                        if dest_name in f_scc[i] and i != largest_scc:
                             dest_cc = i
-                    f_scc[smallest_scc] = f_scc[smallest_scc].union(f_scc[dest_cc])
+                    f_scc[largest_scc] = f_scc[largest_scc].union(f_scc[dest_cc])
                     del f_scc[dest_cc]
                     return True
         return False
@@ -142,28 +145,29 @@ def make_spanning(f, g):
     f_scc = make_scc(f)
     while len(f_scc) > 1:
         scc_sizes = [ len(scc) for scc in f_scc ]
-        smallest_scc = scc_sizes.index(max(scc_sizes))
+        largest_scc = scc_sizes.index(max(scc_sizes))
         
         non_leaves = Set([f.find_name(v) for v in vertices_deg_k(2, f)])
-        non_leaves_in_first_scc = non_leaves.intersection(f_scc[smallest_scc])
-        non_leaves_not_in_first_scc = non_leaves.difference(f_scc[smallest_scc])
+        non_leaves_in_largest_scc = non_leaves.intersection(f_scc[largest_scc])
+        non_leaves_not_in_largest_scc = non_leaves.difference(f_scc[largest_scc])
 
-        leaves_in_first_scc = f_scc[smallest_scc].difference(non_leaves_in_first_scc)
-        leaves_not_in_first_scc = Set([v for scc in f_scc for v in scc]).difference(non_leaves_not_in_first_scc)
+        leaves_in_largest_scc = f_scc[largest_scc].difference(non_leaves_in_largest_scc)
+        leaves_not_in_largest_scc = Set([v for scc in f_scc for v in scc]).difference(non_leaves_not_in_largest_scc)
 
-        if try_union(non_leaves_in_first_scc, non_leaves_not_in_first_scc):
+        if try_union(non_leaves_in_largest_scc, non_leaves_not_in_largest_scc):
             continue
-        elif try_union(non_leaves_in_first_scc, leaves_not_in_first_scc):
+        elif try_union(non_leaves_in_largest_scc, leaves_not_in_largest_scc):
             continue
-        elif try_union(leaves_in_first_scc, non_leaves_not_in_first_scc):
+        elif try_union(leaves_in_largest_scc, non_leaves_not_in_largest_scc):
             continue
         else:
-            try_union(leaves_in_first_scc, leaves_not_in_first_scc)
+            try_union(leaves_in_largest_scc, leaves_not_in_largest_scc)
     return f
 
 
 def find_mlst(g):
-    return make_spanning(make_leafy_forest(g.copy()), g)
+    f = make_leafy_forest(g.copy())
+    return make_spanning(f, g)
 
 
 def load_graphs():
@@ -216,14 +220,14 @@ if __name__ == '__main__':
             for v in graphs[i].vertices():
                 text[v] = str(graphs[i].find_name(v))
                 size[v] = 8
-            graph_draw(graphs[i], nodesfirst=True, vertex_size=1, vertex_text=text, vertex_font_size=size, output="draw/{0}.pdf".format(i))
+            graph_draw(graphs[i], nodesfirst=True, vertex_size=1, vertex_text=text, vertex_font_size=size, output="draw2/{0}.pdf".format(i))
 
             text = mlsts[i].new_vertex_property("string")
             size = mlsts[i].new_vertex_property("int")
             for v in mlsts[i].vertices():
                 text[v] = str(mlsts[i].find_name(v))
                 size[v] = 8
-            graph_draw(mlsts[i],  nodesfirst=True, vertex_size=1, vertex_text=text, vertex_font_size=size, output="draw/{0}_t.pdf".format(i))
+            graph_draw(mlsts[i],  nodesfirst=True, vertex_size=1, vertex_text=text, vertex_font_size=size, output="draw2/{0}_t.pdf".format(i))
             """
         else:
             print("\tERROR: Graph {0} is not a spanning tree!".format(i))
